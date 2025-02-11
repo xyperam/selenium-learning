@@ -1,6 +1,7 @@
 package MouseAction;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -33,54 +34,46 @@ public class MouseHover {
 		WebElement target = driver.findElement(By.xpath("//div[@id='droppable']"));
 		action.dragAndDrop(source, target).perform();
 		
-		//slider
-		WebElement amount = driver.findElement(By.xpath("//input[@id='amount']"));
-		WebElement sliderRange = driver.findElement(By.xpath("//div[contains(@id,'slider-range')]"));
-		WebElement leftSlider = driver.findElement(By.xpath("//div[@id='slider-range']//span[1]"));
-		WebElement rightSlider = driver.findElement(By.xpath("//div[@id='slider-range']//span[2]"));
-		int targetMin = 100;
-		int targetMax = 300;
-		String priceText = amount.getAttribute("value");
-		int currentPrice = extractNumber(priceText);
-		System.out.println(sliderRange.getSize());
-		int minValue = 0;
-		int maxValue = 500;
-		 int sliderWidth = sliderRange.getSize().width;
-	        int leftStart = leftSlider.getLocation().getX();
-	        int rightStart = rightSlider.getLocation().getX();
-	        int sliderStart = sliderRange.getLocation().getX(); // Awal dari slider utama
+		  WebElement leftSlider = driver.findElement(By.xpath("//div[@id='slider-range']//span[1]"));
+	        WebElement rightSlider = driver.findElement(By.xpath("//div[@id='slider-range']//span[2]"));
 
-	        System.out.println("Slider Width: " + sliderWidth);
-	        System.out.println("Left Slider Start: " + leftStart);
-	        System.out.println("Right Slider Start: " + rightStart);
-	        System.out.println("Slider Start: " + sliderStart);
+	        // 🔹 Tentukan nilai minimum & maksimum slider
+	        int minValue = 0;
+	        int maxValue = 500;
+	        WebElement amount = driver.findElement(By.id("amount"));
+	        // 🔹 Target nilai harga yang ingin dicapai
+	        int targetMin = 100;
+	        int targetMax = 300;
 
-	        // 🔹 Geser slider kiri ke targetMin
-	        moveSliderToTarget(action, leftSlider, targetMin, minValue, maxValue, sliderWidth, sliderStart, leftStart);
+	        // 🔹 Ambil ukuran slider
+	        WebElement sliderTrack = driver.findElement(By.id("slider-range"));
+	        int sliderWidth = sliderTrack.getSize().width;
 
-	        // 🔹 Geser slider kanan ke targetMax
-	        moveSliderToTarget(action, rightSlider, targetMax, minValue, maxValue, sliderWidth, sliderStart, rightStart);
+	        // 🔹 Ambil ukuran slider
+	
 
-	        // 🔹 Tunggu sejenak agar perubahan terlihat
-	        Thread.sleep(2000);
+	        // 🔹 Hitung offset berdasarkan persentase
+	        int offsetMin = (int) ((double) (targetMin - minValue) / (maxValue - minValue) * sliderWidth);
+	        int offsetMax = (int) ((double) (targetMax - minValue) / (maxValue - minValue) * sliderWidth);
 
-	        // 🔹 Cek hasil setelah digeser
+	        // 🔹 Buat objek Actions
+	
+
+	        // 🔹 Geser slider kiri ke posisi targetMin
+	        action.dragAndDropBy(leftSlider, offsetMin - 5, 0).perform();
+	        Thread.sleep(1000);
+
+	        // 🔹 Geser slider kanan ke posisi targetMax
+	        action.dragAndDropBy(rightSlider, offsetMax - offsetMin, 0).perform();
+	        Thread.sleep(1000);
+
+	        // 🔹 Cek harga setelah geser slider
 	        System.out.println("Harga Setelah digeser: " + amount.getAttribute("value"));
-
-
+//cek
 	}
 	
-	public static int extractNumber(String text) {
-		 return Integer.parseInt(text.replaceAll("[^0-9]", ""));
-	}
-	   public static void moveSliderToTarget(Actions action, WebElement slider, int target, int min, int max, int sliderWidth, int sliderStart, int handleStart) {
-	        int totalRange = max - min; // Rentang angka pada slider (misal 0 - 500)
-	        int relativeOffset = (int) (((double) (target - min) / totalRange) * sliderWidth); // Offset relatif dalam piksel
-	        int absoluteOffset = (sliderStart + relativeOffset) - handleStart; // Koreksi dengan posisi awal slider
-
-	        System.out.println("Geser slider sejauh: " + absoluteOffset + " piksel");
-
-	        // Geser slider langsung ke offset yang dihitung
-	        action.clickAndHold(slider).moveByOffset(absoluteOffset, 0).release().perform();
-	    }
+//	public static int extractNumber(String text) {
+//		 return Integer.parseInt(text.replaceAll("[^0-9]", ""));
+//	}
+	   
 }
